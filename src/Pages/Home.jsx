@@ -21,8 +21,8 @@ const Home = () => {
 
 
 
-            <div>
-                <h1 className="text-2xl md:text-5xl font-bold text-center  text-black mb-6 mt-10">{currentDateTime}</h1>
+            <div >
+                <h1 className="text-2xl md:text-5xl font-bold text-center  text-black mb-6 mt-6">{currentDateTime}</h1>
             </div>
 
 
