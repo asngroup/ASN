@@ -1,46 +1,135 @@
+import { useContext, useState } from "react";
+import { useForm } from "react-hook-form";
+import { AuthContext } from "../Provider/AuthProvider";
+import Swal from "sweetalert2";
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Login = () => {
+
+    const { signIn } = useContext(AuthContext);
+    const [showPassword, setShowPassword] = useState(false);
+    const navigation = useNavigate();
+    const location = useLocation();
+
+    const from = location.state?.from?.pathname || "/";
+
+
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm()
+
+
+
+    const onSubmit = (data) => {
+
+        const { email, password } = data;
+ 
+
+        // console.log(data)
+
+        // signIn User 
+        signIn(email, password)
+            .then(result => {
+                const logInUser = result.user;
+                console.log(logInUser)
+                Swal.fire({
+                    title: "LogIn Success!",
+                    text: "Congratulations! Well Come Your Website.",
+                    icon: "success"
+                });
+
+                navigation(from, { replace: true })
+
+
+
+            })
+            .catch(error => {
+                console.log(error)
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Something went wrong!",
+                });
+            })
+
+    }
+
+
+
+
+
     return (
         <div>
 
-            {/* <!-- component --> */}
-            <div className="container px-4 mx-auto">
-                <div className="max-w-lg mx-auto">
-                    <div className="text-center mb-6">
-                        <h2 className="text-3xl md:text-4xl font-extrabold">Sign in</h2>
-                    </div>
-                    <form action="">
-                        <div className="mb-6">
-                            <label className="block mb-2 font-extrabold" >Email</label>
-                            {/* <input > */}
+            <section className=" ">
 
-                            
-                            <input className="inline-block w-full p-4 leading-6 text-lg font-extrabold placeholder-indigo-900 bg-white shadow border-2 border-indigo-900 rounded" type="email" placeholder="email"/>
+                <div className="container flex flex-col justify-center p-6 mx-auto sm:py-12 lg:py-24 lg:flex-row lg:justify-between">
+ 
 
-                        </div>
-                        <div className="mb-6">
-                            <label className="block mb-2 font-extrabold" >Password</label>
-                            {/* <input className="inline-block w-full p-4 leading-6 text-lg font-extrabold placeholder-indigo-900 bg-white shadow border-2 border-indigo-900 rounded" type="password" placeholder="**********"> */}
+                    <div className="card shrink-0 w-full p-6 max-w-sm shadow-2xl bg-base-100 border-2 border-blue-200  rounded-3xl  hover:bg-blue-200 " style={{ boxShadow: 'rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px' }}>
 
-                            <input type="password" name="" id="" className="inline-block w-full p-4 leading-6 text-lg font-extrabold placeholder-indigo-900 bg-white shadow border-2 border-indigo-900 rounded" placeholder="**********"/>
-                        </div>
-                        <div className="flex flex-wrap -mx-4 mb-6 items-center justify-between">
-                            <div className="w-full lg:w-auto px-4 mb-4 lg:mb-0">
-                                <label >
-                                    {/* <input type="checkbox"> */}
-                                    <input type="checkbox" name="" id="" />
-                                        <span className="ml-1 font-extrabold">Remember me</span>
+                        <h1 className="text-center font-bold mb-10 text-3xl">Login to your account</h1>
+
+                        <form className=" " onSubmit={handleSubmit(onSubmit)}>
+
+                            {/* Email */}
+                            <div className="flex flex-col">
+                                <label className="label">
+                                    <span className="font-bold ">Email</span>
+                                </label>
+                                <input type="email" name="email" placeholder="email" className="input input-bordered border rounded-xl border-blue-300  mt-2"   {...register("email", { required: true })} />
+                                {errors.email && <span className="text-red-600 font-bold">This field is required</span>}
+                            </div>
+
+                            {/* Password */}
+                            <div className="flex flex-col">
+                                <label className="label mt-4">
+                                    <span className="font-bold ">Password</span>
+                                </label>
+                                <label className="  flex items-center gap-2 input border-blue-300 bg-white mt-3  border rounded-3xl   ">
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="password"
+                                        name="password"
+                                        // className="   "
+                                        {...register("password", { required: true })}
+
+                                    />
+
+                                    <span onClick={() => setShowPassword(!showPassword)} className="cursor-pointer ">
+                                        {
+                                            showPassword ? <FaRegEye className="ml-2" /> : <FaRegEyeSlash className="ml-2" />
+                                        }
+                                    </span>
+
+                                </label>
+ 
+                                {errors.password && <span className="text-red-600 font-bold">This field is required</span>}
+
+                                {/* Forget Pass */}
+                                <label className="label mt-4">
+                                    <a href="#" className="label-text-alt link link-hover font-bold ">Forgot password?</a>
                                 </label>
                             </div>
-                            <div className="w-full lg:w-auto px-4"><a className="inline-block font-extrabold hover:underline" href="#">Forgot your
-                                password?</a></div>
-                        </div>
-                        <button className="inline-block w-full py-4 px-6 mb-6 text-center text-lg leading-6 text-white font-extrabold bg-indigo-800 hover:bg-indigo-900 border-3 border-indigo-900 shadow rounded transition duration-200">Sign in</button>
-                        <p className="text-center font-extrabold">Don&rsquo;t have an account? <a className="text-red-500 hover:underline"
-                            href="#">Sign up</a></p>
-                    </form>
-                </div>
-            </div>
+
+                            {/* Login button */}
+                            <div className="mt-6 flex justify-center">
+                                <button className="justify-center w-full px-7 py-4 text-[18px] font-bold rounded-full   bg-indigo-600   
+                p-4    hover:bg-transparent hover:outline text-black hover:text-black mr-3 mt-4
+                ">Login</button>
+                            </div>
+                        </form>
+
+
+
+                    </div>
+
+                </div >
+            </section >
 
         </div>
     );

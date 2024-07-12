@@ -5,6 +5,7 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { router } from "./Router/Router"
+
 import {
   QueryClient,
   QueryClientProvider,
@@ -13,10 +14,17 @@ import {
 const queryClient = new QueryClient()
 
 
+import AuthProvider from './Provider/AuthProvider';
+
+
+
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </AuthProvider>
   </React.StrictMode>,
 )

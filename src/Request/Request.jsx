@@ -1,8 +1,35 @@
 
 import "react-datepicker/dist/react-datepicker.css";
 import { useForm } from "react-hook-form";
+import useAxiosPublic from "../Hooks/axiosPublic/axiosPublic";
+import { useQuery } from "@tanstack/react-query";
+import { AuthContext } from "../Provider/AuthProvider";
+import { useContext } from "react";
+import Swal from "sweetalert2";
 
 const Request = () => {
+
+
+    const axiosPublic = useAxiosPublic();
+    const { user } = useContext(AuthContext);
+
+    const today = new Date();
+    const date = today.getDate();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+
+
+
+    const { data: users = [] } = useQuery({
+        queryKey: ['users'],
+        queryFn: async () => {
+            const res = await axiosPublic.get(`/users/${user.email}`)
+            return res.data;
+
+        }
+
+    })
+
 
 
     const {
@@ -11,9 +38,32 @@ const Request = () => {
         formState: { errors },
     } = useForm()
 
-    const onSubmit = (data) => {
-        console.log(data)
+    const onSubmit = async (data) => {
+        // console.log(data)
+
+        // create user save Data in MongoDB
+        const userInfo = {
+            name: users.name,
+            email: users.email,
+            amount: data.amount,
+            trId: data.TrId,
+            status: "pending",
+            date: `${date}/${month}/${year}`
+        }
+        // console.log(userInfo)
+
+        const res = await axiosPublic.post('/payments', userInfo)
+
+        Swal.fire({
+            title: "Payment Request Success!",
+            text: "congratulations!",
+            icon: "success"
+        });
+
+
+        console.log(res)
     }
+
 
 
 
@@ -44,7 +94,7 @@ const Request = () => {
                                     <span className="label-text font-bold">Your Name</span>
                                 </label>
                                 <div className="border border-blue-300   focus:dark:border-blue-500">
-                                    <input type="text" name="username" id="username" className="input input-bordered lg:w-[600px] w-full    border-blue-300   focus:dark:border-blue-500 dark:bg-gray-400" disabled />
+                                    <input type="text" name="username" id="username" defaultValue={users.name} className="input input-bordered lg:w-[600px] w-full    border-blue-300    focus:dark:border-blue-500  " disabled />
                                 </div>
 
                             </div>
@@ -55,7 +105,7 @@ const Request = () => {
                                     <span className="label-text lg:ml-4 font-bold">Your Email</span>
                                 </label>
                                 <div className="border border-blue-300   focus:dark:border-blue-500 lg:ml-4">
-                                    <input type="text" name="email" id="email" className="input input-bordered  lg:w-[600px] lg:ml-4 w-full    border-blue-300   focus:dark:border-blue-500 dark:bg-gray-400" disabled />
+                                    <input type="text" name="email" id="email" defaultValue={users.email} className="input input-bordered  lg:w-[600px] lg:ml-4 w-full    border-blue-300   focus:dark:border-blue-500  " disabled />
 
                                 </div>
                             </div>
@@ -70,11 +120,9 @@ const Request = () => {
                                     <span className="label-text font-bold lg:ml-4">Amount</span>
                                 </label>
                                 <select className="select select-primary w-full lg:ml-4  lg:w-[600px] *: border-blue-400   focus:dark:border-blue-500 " name="amount" id="amount" {...register("amount", { required: true })}>
-                                    <option disabled selected>Amount</option>
                                     <option>1000</option>
                                     <option>2000</option>
                                     <option>3000</option>
-                                    <option>Cash</option>
 
                                 </select>
                                 {errors.amount && <span className="text-red-600 font-bold">This field is required</span>}

@@ -1,13 +1,39 @@
-import { NavLink } from "react-router-dom";
+import { useContext } from "react";
+import { Link, NavLink } from "react-router-dom";
+import { AuthContext } from "../Provider/AuthProvider";
+import Swal from "sweetalert2";
+ 
 
 const Navbar = () => {
 
+    const { user, logOut } = useContext(AuthContext);
+
+
+
+
+
+    // handle LogOut Btn
+    const handleLogOut = () => {
+        logOut()
+            .then(() => {
+                Swal.fire({
+                    title: "Logout Success!",
+                    text: "Logout !",
+                    icon: "success"
+                });
+                NavigationPreloadManager('/')
+            })
+            .catch(error => console.log(error))
+
+    }
 
     const navLinks = <>
 
         <li><NavLink to={'/'}>Home</NavLink></li>
         <li><NavLink to={'/request'}>Payment Request</NavLink></li>
         <li><NavLink to={'/profile'}>Profile</NavLink></li>
+
+        {user?.role === 'user' && "Dashboard"}
     </>
 
 
@@ -52,7 +78,10 @@ const Navbar = () => {
                     </ul>
                 </div>
                 <div className="navbar-end">
-                    <a className="btn">Button</a>
+                    <span className="mr-4">{user?.email}</span>
+                    <Link onClick={handleLogOut} to={'/login'} className="block py-3 px-4  font-medium text-center text-white bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 active:shadow-none rounded-lg shadow md:inline">
+                        Logout
+                    </Link>
                 </div>
             </div>
         </div>

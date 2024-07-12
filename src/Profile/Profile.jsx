@@ -1,20 +1,73 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "../Hooks/axiosPublic/axiosPublic";
+import { useContext, useEffect, useState } from "react";
+import { AuthContext } from "../Provider/AuthProvider";
+
 
 const Profile = () => {
+
     const axiosPublic = useAxiosPublic();
+    const { user } = useContext(AuthContext);
+
+    const [pendingSum, setPendingSum] = useState(0);
+    const [approvedSum, setApprovedSum] = useState(0);
+
+
+
+
+ 
+
 
     const { data: users = [] } = useQuery({
         queryKey: ['users'],
         queryFn: async () => {
-            const res = await axiosPublic.get(`/users`)
+            const res = await axiosPublic.get(`/users/${user.email}`)
             return res.data;
 
         }
 
     })
 
-    console.log(users)
+
+    const { data: payments = [] } = useQuery({
+        queryKey: ['payments'],
+        queryFn: async () => {
+            const res = await axiosPublic.get(`/payments/${user.email}`)
+            return res.data;
+
+        }
+
+    })
+
+    console.log(payments)
+
+
+    useEffect(() => {
+        let pendingTotal = 0;
+        let approvedTotal = 0;
+    
+        payments.forEach(transaction => {
+          const amount = parseInt(transaction.amount); // Convert amount to number
+    
+          if (transaction.status === 'pending') {
+            pendingTotal += amount;
+          } else if (transaction.status === 'approved') {
+            approvedTotal += amount;
+          }
+        });
+    
+        // Update state with calculated totals
+        setPendingSum(pendingTotal);
+        setApprovedSum(approvedTotal);
+      }, [payments]);
+
+
+
+      console.log("pending",pendingSum)
+      console.log("approved", approvedSum)
+
+
+
 
     return (
         <div className="mx-auto container">
@@ -32,12 +85,13 @@ const Profile = () => {
                     <img src={'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ'} alt="" className="object-cover object-center h-32" />
                 </div>
                 <div className="text-center mt-2">
-                    <h2 className="font-semibold">Sarah Smith</h2>
-                    <p className="text-gray-500">sarah@gmail.com</p>
+                    <h2 className="font-bold text-xl">{users.name}</h2>
+                    <p className="text-black font-semibold text-xl">{users.email}</p>
                 </div>
 
                 <div className="p-4 border-t mx-8 mt-2">
-                    <button className="w-full  block mx-auto rounded-full bg-[#3F296E] hover:shadow-lg font-semibold text-white px-6 py-2">Your Total Amount : 20000</button>
+                    <button className="w-full  block mx-auto rounded-full bg-red-600 hover:shadow-lg font-semibold text-white px-6 py-2"> Pending Amount : {pendingSum}</button>
+                    <button className="w-full  block mx-auto rounded-full bg-green-500 hover:shadow-lg font-semibold text-black px-6 py-2 mt-4">Your Total Amount : {approvedSum}</button>
                 </div>
             </div>
 
@@ -61,49 +115,32 @@ const Profile = () => {
                     </thead>
                     <tbody>
                         {/* row 1 */}
-                        <tr className=" bg-blue-200 hover:bg-blue-300 rounded-2xl">
+                        {payments.map(payment => <tr key={payment._id} className=" bg-blue-200 hover:bg-blue-300 rounded-2xl">
 
                             <td className="text-black font-medium">
-                                09/07/2024
+                                {payment.date}
                             </td>
 
                             <td className="text-black font-medium">
-                                Rasel
+                                {payment.name}
                             </td>
                             <td className="text-black font-medium">
-                                1000
+                                {payment.amount}
                             </td>
                             <td className="text-black font-medium">
-                                TrId
+                                {payment.trId}
                             </td>
                             <td>
-                                <button className="bg-green-600 p-2 rounded-xl text-black font-bold">Paid</button>
+                                {payment?.status === 'pending' ?
+
+                                    <button className="inline-flex items-center   justify-center w-full px-4 py-3 text-base font-bold leading-6 text-white  border-transparent rounded-full md:w-auto hover:bg-indigo-500 bg-red-600 hover:bg-transparent hover:outline hover:text-black cursor-pointer">{payment?.status || "Premium"}</button>
+                                    :
+                                    <button className="inline-flex items-center   justify-center w-full px-4 py-3 text-base font-bold leading-6 text-white  border-transparent rounded-full md:w-auto hover:bg-indigo-500 bg-green-600 hover:bg-transparent hover:outline hover:text-black cursor-pointer">{payment?.status || "Not Premium"}</button>}
                             </td>
-                        </tr>
+                        </tr>)}
                     </tbody>
 
-                    <tbody>
-                        {/* row 2 */}
-                        <tr className=" bg-blue-200 hover:bg-blue-300 rounded-2xl">
 
-                            <td className="text-black font-medium">
-                                09/07/2024
-                            </td>
-
-                            <td className="text-black font-medium">
-                                Arif
-                            </td>
-                            <td className="text-black font-medium">
-                                1000
-                            </td>
-                            <td className="text-black font-medium">
-                                TrId
-                            </td>
-                            <td>
-                                <button className="bg-red-600 p-2 rounded-xl text-black font-bold">Paid</button>
-                            </td>
-                        </tr>
-                    </tbody>
 
 
                 </table>
